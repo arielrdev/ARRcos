@@ -1,0 +1,19 @@
+{
+  "name": "monitor-arr",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Monitoreo ARR",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node monitor-arr.js"
+  },
+  "author": "Eder Ariel",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "node-notifier": "^10.0.1",
+    "node-schedule": "^2.1.1",
+    "open": "^10.1.0"
+  }
+}
