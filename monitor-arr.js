@@ -2,6 +2,7 @@ import axios from 'axios';
 import notifier from 'node-notifier';
 import schedule from 'node-schedule';
 import colors from 'colors';
+import moment from 'moment';
 
 /** URLs a Monitorear */
 const urls = [
@@ -36,7 +37,9 @@ const checkURL = async (url) => {
 /** Programar la verificacion cada minuto */
 schedule.scheduleJob('*/1 * * * *', () => {
     console.clear()
-    console.log('URLs comprobados en el último minuto'.cyan);
+
+    const currentTime = moment().format('HH:mm');
+    console.log(`URLs comprados en el último minuto - Hora: ${currentTime}`.cyan);
     urls.forEach((url) => {
         checkURL(url);
     })
