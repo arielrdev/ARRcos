@@ -57,7 +57,9 @@ const checkURL = async (url) => {
 schedule.scheduleJob('*/1 * * * *', () => {
     console.clear()
 
-    console.log(`URLs comprados en el último minuto - FechaHora: `.cyan);
+    const horaMinuto = moment().format('HH:mm')
+
+    console.log(`URLs comprados en el último minuto - Hora: ${horaMinuto}`.cyan);
     urls.forEach((url) => {
         checkURL(url);
     })
