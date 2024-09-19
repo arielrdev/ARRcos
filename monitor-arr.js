@@ -9,8 +9,8 @@ import fastCsv from 'fast-csv'
 /** URLs a Monitorear */
 const urls = [
     'https://www.bienlinea.bi.com.gt/test.asp',
-    'https://www.bibanking2.bi.com.gt/test.asp',
-    'https://crm1.bi.com.gt/test.asp'
+    'https://www.bibanking.bi.com.gt/test.asp',
+    'https://crm.bi.com.gt/test.asp'
 ]
 
 /** Archivo CSV */
