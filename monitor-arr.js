@@ -9,17 +9,15 @@ import fastCsv from 'fast-csv'
 /** URLs a Monitorear */
 const urls = [
     'https://www.bienlinea.bi.com.gt/test.asp',
-    'https://www.bibanking1.bi.com.gt/test.asp',
+    'https://www.bibanking2.bi.com.gt/test.asp',
     'https://crm1.bi.com.gt/test.asp'
 ]
 
 /** Archivo CSV */
 const csvFilePath = 'historico_fallos.csv';
-const fechaHora = moment().format('YYYY-MM-DD HH:mm:ss');
 
 /** Funcion para agregar un registro al CSV */
 const appendToCSV = (registro) => {
-        console.log(registro);
         
         const ws = fs.createWriteStream(csvFilePath, { flags: 'a'});
     fastCsv
@@ -36,6 +34,7 @@ const checkURL = async (url) => {
         }
         
     } catch (error) {
+        const fechaHora = moment().format('YYYY-MM-DD HH:mm:ss');
         const estado = error.response ? error.response.status : 'Sin respuesta';
 
         /** Guardar en el CSV */
@@ -58,7 +57,7 @@ const checkURL = async (url) => {
 schedule.scheduleJob('*/1 * * * *', () => {
     console.clear()
 
-    console.log(`URLs comprados en el último minuto - FechaHora: ${fechaHora}`.cyan);
+    console.log(`URLs comprados en el último minuto - FechaHora: `.cyan);
     urls.forEach((url) => {
         checkURL(url);
     })
