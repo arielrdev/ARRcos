@@ -6,6 +6,11 @@ import moment from 'moment';
 import fs from 'fs';
 import fastCsv from 'fast-csv';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+/** Obtener el directorio actual  */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /** URLs a Monitorear */
 const urls = [
@@ -16,7 +21,7 @@ const urls = [
 ];
 
 /** Archivo CSV */
-const csvFilePath = 'historico_fallos.csv';
+const csvFilePath = path.join(__dirname, 'historico_fallos.csv');
 
 /** Abrir el flujo de escritura de manera global */
 let writeStream;
@@ -72,7 +77,7 @@ const checkURL = async (url) => {
             title: 'ARR No Responde',
             message: `El sistema en ${url} no está respondiendo. Fecha y Hora: ${fechaHora}`,
             icon: './iconos/error.svg',
-            sound: true,
+            sound: false,
             appID: url
         });
         console.log(`El sistema en ${url} no está respondiendo - status: ${estado}`.red);
