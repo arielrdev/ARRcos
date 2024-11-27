@@ -17,7 +17,8 @@ const urls = [
     'https://www.bienlinea.bi.com.gt/test.asp',
     'https://www.bibanking.bi.com.gt/test.asp',
     'https://crm.bi.com.gt/test.asp',
-    'https://agentesbiafiliados.bi.com.gt'
+    'https://agentesbiafiliados.bi.com.gt',
+    'https://www.corporacionbi.com'
 ];
 
 /** Archivo CSV */
