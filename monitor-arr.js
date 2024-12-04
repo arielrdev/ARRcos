@@ -12,23 +12,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/** Leer las URLs desde el archivo data.txt */
+/** Archivo de URLs */
 const urlsFilePath = path.join(__dirname, 'data.txt');
-const loadURLs = () => {
-    try {
-        const data = fs.readFileSync(urlsFilePath, 'utf8');
-        const urls = data.split('\n').map(url => url.trim()).filter(url => url);
-        console.log('URLs cargadas desde data.txt', urls);
-        return urls;
-        
-    } catch (error) {
-        console.log('Error al leer el archivo.txt', error);
-        return [];
-        
-    }
-}
-
-const urls = loadURLs();
 
 /** URLs a Monitorear */
 // const urls = [
@@ -67,6 +52,18 @@ const closeCSVStream = () => {
         console.log("Flujo de escritura CSV cerrado.".yellow);
     }
 };
+
+/** Función para leer las URLs desde el archivo */
+const loadURLs = () => {
+    try {
+        const data = fs.readFileSync(urlsFilePath, 'utf8');
+        return data.split('\n').map(url => url.trim()).filter(url => url);
+    } catch (error) {
+        console.log('Error al leer el archivo.txt', error);
+        return [];
+    }
+}
+
 
 /** Funcion para agregar un registro al CSV */
 const appendToCSV = (registro) => {
@@ -108,6 +105,8 @@ schedule.scheduleJob('*/1 * * * *', async () => {
     console.clear();
     const horaMinuto = moment().format('HH:mm');
     console.log(`URLs comprobados en el último minuto - Hora: ${horaMinuto}`.cyan);
+    
+    const urls = loadURLs();
     await Promise.all(urls.map(checkURL));
 });
 
