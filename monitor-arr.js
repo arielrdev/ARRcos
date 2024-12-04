@@ -15,15 +15,6 @@ const __dirname = path.dirname(__filename);
 /** Archivo de URLs */
 const urlsFilePath = path.join(__dirname, 'data.txt');
 
-/** URLs a Monitorear */
-// const urls = [
-//     'https://www.bienlinea.bi.com.gt/test.asp',
-//     'https://www.bibanking.bi.com.gt/test.asp',
-//     'https://crm.bi.com.gt/test.asp',
-//     'https://agentesbiafiliados.bi.com.gt',
-//     'https://www.corporacionbi.com'
-// ];
-
 /** Archivo CSV */
 const csvFilePath = path.join(__dirname, 'historico_fallos.csv');
 
@@ -63,7 +54,6 @@ const loadURLs = () => {
         return [];
     }
 }
-
 
 /** Funcion para agregar un registro al CSV */
 const appendToCSV = (registro) => {
