@@ -12,14 +12,32 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/** Leer las URLs desde el archivo data.txt */
+const urlsFilePath = path.join(__dirname, 'data.txt');
+const loadURLs = () => {
+    try {
+        const data = fs.readFileSync(urlsFilePath, 'utf8');
+        const urls = data.split('\n').map(url => url.trim()).filter(url => url);
+        console.log('URLs cargadas desde data.txt', urls);
+        return urls;
+        
+    } catch (error) {
+        console.log('Error al leer el archivo.txt', error);
+        return [];
+        
+    }
+}
+
+const urls = loadURLs();
+
 /** URLs a Monitorear */
-const urls = [
-    'https://www.bienlinea.bi.com.gt/test.asp',
-    'https://www.bibanking.bi.com.gt/test.asp',
-    'https://crm.bi.com.gt/test.asp',
-    'https://agentesbiafiliados.bi.com.gt',
-    'https://www.corporacionbi.com'
-];
+// const urls = [
+//     'https://www.bienlinea.bi.com.gt/test.asp',
+//     'https://www.bibanking.bi.com.gt/test.asp',
+//     'https://crm.bi.com.gt/test.asp',
+//     'https://agentesbiafiliados.bi.com.gt',
+//     'https://www.corporacionbi.com'
+// ];
 
 /** Archivo CSV */
 const csvFilePath = path.join(__dirname, 'historico_fallos.csv');
