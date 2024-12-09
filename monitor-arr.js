@@ -74,19 +74,54 @@ const checkURL = async (url) => {
         }
     } catch (error) {
         const fechaHora = moment().format('YYYY-MM-DD HH:mm:ss');
-        const estado = error.response ? error.response.status : (error.code || 'Sin respuesta');
+        let estado = '';
+        let mensajeError = '';
+
+        /** Clasificación de Errores */
+        if(error.response) {
+            /** Errores HTTP */
+            estado = error.response.status;
+            mensajeError = `HTTP Error ${estado}: ${error.response.statusText}`;
+        } else if (error.code) {
+            /** Errores de Red */
+            estado = error.code;
+
+            switch (error.code) {
+                case 'ENOTFOUND':
+                    mensajeError = 'No se puede resolver la URL (ENOTFOUND)';
+                    break;
+                
+                case 'ECONNREFUSED':
+                    mensajeError = 'Conexión rechazada por el servidor (ECONNREFUSED)';
+                    break;
+                
+                case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE':
+                    mensajeError = 'Certificado SSL no verificado (UNABLE_TO_VERIFY_LEAF_SIGNATURE)';
+                    break;
+
+                default:
+                    mensajeError = `Error de red desconocido: ${error.code}`;
+                    // break;
+            }
+        } else {
+            // Errores desconocidos
+            estado = 'Sin respuesta';
+            mensajeError = 'Error desconocido';
+        }
 
         /** Guardar en el CSV */
-        appendToCSV({ fechaHora, url, estado });
+        appendToCSV({ fechaHora, url, estado, mensajeError });
 
         notifier.notify({
             title: 'ARR No Responde',
-            message: `El sistema en ${url} no está respondiendo. Fecha y Hora: ${fechaHora}`,
+            // message: `El sistema en ${url} no está respondiendo. Fecha y Hora: ${fechaHora}`,
+            message: `El sistema en ${url} tuvo un problema: ${mensajeError}. Fecha y Hora: ${fechaHora}`,
             icon: './iconos/error.svg',
             sound: false,
             appID: url
         });
-        console.log(`El sistema en ${url} no está respondiendo - status: ${estado}`.red);
+        console.log(`Problema con ${url} - ${mensajeError}`.red);
+        // console.log(`El sistema en ${url} no está respondiendo - status: ${estado}`.red);
     }
 };
 
