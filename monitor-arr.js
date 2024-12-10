@@ -24,6 +24,8 @@ let csvFormatter;
 
 /** Arreglos */
 const lastErrorState = new Map();
+/** Estructura en memoria para los resúmenes diarios */
+let resumenDiario = {};
 
 const openCSVStream = () => {
     if (!writeStream) {
@@ -137,20 +139,42 @@ const checkURL = async (url) => {
                 detalles: ''
             });
 
-            /** Notificar al usuario */
-            // notifier.notify({
-            //     title: 'ARR No Responde',
-            //     message: `El sistema en ${url} tuvo un problema: ${mensajeError}. Fecha y Hora: ${fechaHora}`,
-            //     icon: './iconos/error.svg',
-            //     sound: false,
-            //     appID: url
-            // });
+            /** Acumular en el resumen diario */
+            if(!resumenDiario[url]) {
+                resumenDiario[url] = {}
+                resumenDiario[url][mensajeError] = (resumenDiario[url][mensajeError] || 0) + 1;
+            }
+
             console.log(`Problema con ${url} - ${mensajeError}`.red);
         } else {
             console.log(`Error repetido en ${url} - ${mensajeError}`.red);
         }
     }
 };
+
+const generarResumenDiario = () => {
+    const fechaHoy = moment().format('YYYY-MM-DD');
+
+    for (const [url, errores] of Object.entries(resumenDiario)) {
+        const detalles = Object.entries(errores)
+            .map(([mensaje, conteo]) => `${mensaje}: ${conteo} veces`)
+            .join(', ');
+        
+        const totalErrores = Object.values(errores).reduce((acc, val) => acc + val, 0);
+
+        appendToCSV({
+            tipoRegistro: 'Resumen',
+            fechaHora: fechaHoy,
+            url,
+            estado: '',
+            mensajeError: '',
+            totalErrores,
+            detalles
+        });
+    }
+    console.log(`Resumen diario generado para el ${fechaHoy}`.cyan);
+    resumenDiario = {} // Limpiar el resumen para el próximo día
+}
 
 
 /** Programar la verificacion cada minuto */
@@ -161,6 +185,12 @@ schedule.scheduleJob('*/1 * * * *', async () => {
     
     const urls = loadURLs();
     await Promise.all(urls.map(checkURL));
+});
+
+
+/** JOB - Genera Resumen al final del día */
+schedule.scheduleJob('59 23 * * *', () => {
+    generarResumenDiario();
 });
 
 console.log('Iniciando monitorización de ARR cada minuto...');
