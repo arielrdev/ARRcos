@@ -22,6 +22,9 @@ const csvFilePath = path.join(__dirname, 'historico_fallos.csv');
 let writeStream;
 let csvFormatter;
 
+/** Arreglos */
+const lastErrorState = new Map();
+
 const openCSVStream = () => {
     if (!writeStream) {
         writeStream = fs.createWriteStream(csvFilePath, { flags: 'a' });
@@ -65,12 +68,24 @@ const appendToCSV = (registro) => {
     }
 };
 
+/** Función para evitar errores duplicados */
+const shouldLogError = (url, estado) => {
+    const lastState = lastErrorState.get(url);
+    if (lastState !== estado) {
+        lastErrorState.set(url, estado);
+        return true;
+    }
+
+    return false;
+}
+
 /** Funcion para verificar el estado de las URLs */
 const checkURL = async (url) => {
     try {
         const response = await axios(url);
         if (response.status === 200) {
             console.log(`El sistema en ${url} está respondiendo correctamente`.green);
+            lastErrorState.delete(url); // Elimina el estado anterior si está activo
         }
     } catch (error) {
         const fechaHora = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -78,7 +93,7 @@ const checkURL = async (url) => {
         let mensajeError = '';
 
         /** Clasificación de Errores */
-        if(error.response) {
+        if (error.response) {
             /** Errores HTTP */
             estado = error.response.status;
             mensajeError = `HTTP Error ${estado}: ${error.response.statusText}`;
@@ -90,18 +105,18 @@ const checkURL = async (url) => {
                 case 'ENOTFOUND':
                     mensajeError = 'No se puede resolver la URL (ENOTFOUND)';
                     break;
-                
+
                 case 'ECONNREFUSED':
                     mensajeError = 'Conexión rechazada por el servidor (ECONNREFUSED)';
                     break;
-                
+
                 case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE':
                     mensajeError = 'Certificado SSL no verificado (UNABLE_TO_VERIFY_LEAF_SIGNATURE)';
                     break;
 
                 default:
                     mensajeError = `Error de red desconocido: ${error.code}`;
-                    // break;
+                    break;
             }
         } else {
             // Errores desconocidos
@@ -109,21 +124,34 @@ const checkURL = async (url) => {
             mensajeError = 'Error desconocido';
         }
 
-        /** Guardar en el CSV */
-        appendToCSV({ fechaHora, url, estado, mensajeError });
+        /** Verificar si el error debe registrarse */
+        if (shouldLogError(url, estado)) {
+            /** Guardar en el CSV - Tiempo Real */
+            appendToCSV({
+                tipoRegistro: 'TiempoReal',
+                fechaHora,
+                url,
+                estado,
+                mensajeError,
+                totalErrores: '',
+                detalles: ''
+            });
 
-        notifier.notify({
-            title: 'ARR No Responde',
-            // message: `El sistema en ${url} no está respondiendo. Fecha y Hora: ${fechaHora}`,
-            message: `El sistema en ${url} tuvo un problema: ${mensajeError}. Fecha y Hora: ${fechaHora}`,
-            icon: './iconos/error.svg',
-            sound: false,
-            appID: url
-        });
-        console.log(`Problema con ${url} - ${mensajeError}`.red);
-        // console.log(`El sistema en ${url} no está respondiendo - status: ${estado}`.red);
+            /** Notificar al usuario */
+            // notifier.notify({
+            //     title: 'ARR No Responde',
+            //     message: `El sistema en ${url} tuvo un problema: ${mensajeError}. Fecha y Hora: ${fechaHora}`,
+            //     icon: './iconos/error.svg',
+            //     sound: false,
+            //     appID: url
+            // });
+            console.log(`Problema con ${url} - ${mensajeError}`.red);
+        } else {
+            console.log(`Error repetido en ${url} - ${mensajeError}`.red);
+        }
     }
 };
+
 
 /** Programar la verificacion cada minuto */
 schedule.scheduleJob('*/1 * * * *', async () => {
